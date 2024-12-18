@@ -41,6 +41,7 @@ jobs:
         PR_TITLE: ${{ github.event.pull_request.title }}
       run: |
         echo "Sending Slack notification..."
+        echo "$SLACK_WEBHOOK_URL"
         curl --connect-timeout 2 -sSf -k -X POST -H 'Content-type: application/json' --data '{"text": "'"$PR_TITLE"'"}' $SLACK_WEBHOOK_URL
 
     - name: backport_assign_check
@@ -51,7 +52,7 @@ jobs:
         PW: ${{ secrets.USER_CRED }}
       run: |
         PR="${{ github.event.pull_request.body }}"
-        echo $PR | grep -oP '\(backport #\K\d+' | tail -n 1)
+        echo "$PR" | grep -oP '\(backport #\K\d+' | tail -n 1)
         author=$(gh pr view ${ORI_PR} -R ${REPO} --json author -q '.author.login')
         if [[ ! "${author}" =~ "mergify" ]]; then
           gh pr edit ${PR_NUMBER} -R ${REPO} --add-assignee ${author} || true
